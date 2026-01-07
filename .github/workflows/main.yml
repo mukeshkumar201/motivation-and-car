@@ -1,0 +1,38 @@
+name: Motivation Bot
+
+on:
+  schedule:
+    # Subah 9:00 AM aur Shaam 6:00 PM (IST approx)
+    - cron: '30 3 * * *'  
+    - cron: '30 12 * * *'
+  workflow_dispatch:      # Manual Run Button
+
+jobs:
+  run_bot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Libraries
+        run: pip install -r requirements.txt
+
+      - name: Run Script
+        env:
+          G_CLIENT_ID: ${{ secrets.G_CLIENT_ID }}
+          G_CLIENT_SECRET: ${{ secrets.G_CLIENT_SECRET }}
+          G_REFRESH_TOKEN: ${{ secrets.G_REFRESH_TOKEN }}
+          
+          INSTA_USERNAME: ${{ secrets.INSTA_USERNAME }}
+          INSTA_PASSWORD: ${{ secrets.INSTA_PASSWORD }}
+          INSTA_SESSION: ${{ secrets.INSTA_SESSION }}
+          
+          DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
+          DRIVE_DONE_ID: ${{ secrets.DRIVE_DONE_ID }}
+        run: python main.py
