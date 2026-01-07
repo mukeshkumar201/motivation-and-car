@@ -38,7 +38,7 @@ Follow for daily motivation! 🚀
 .
 """ + HASHTAGS
 
-# --- GOOGLE AUTH ---
+# --- GOOGLE LOGIN ---
 def get_google_services():
     creds = Credentials(
         None, 
@@ -52,27 +52,20 @@ def get_google_services():
     
     return build('drive', 'v3', credentials=creds), build('youtube', 'v3', credentials=creds)
 
-# --- EDITING FUNCTION (Speed + Filter + Gap) ---
+# --- EDITING FUNCTION ---
 def edit_video(input_path, output_path):
     print("Editing Start: Adding Speed, Filter, and Border...")
-    
-    # 1. Video Load
     clip = VideoFileClip(input_path)
     
-    # 2. Speed 1.1x (Fast)
+    # 1. Speed 1.1x
     clip = clip.fx(vfx.speedx, 1.1)
-    
-    # 3. Filter (Color Vibrance 1.2x - Thoda Bright aur Colors Change)
+    # 2. Filter (Color Vibrance)
     clip = clip.fx(vfx.colorx, 1.2)
-    
-    # 4. Border/Gap (White Color padding)
-    # top, bottom, left, right = 40 pixels ka gap
-    # color=(255, 255, 255) Matlab White. Black chahiye to (0,0,0) kar dena.
+    # 3. Border (White Gap)
     clip = clip.margin(top=40, bottom=40, left=40, right=40, color=(255, 255, 255))
     
-    # 5. Save Final Video
     clip.write_videofile(output_path, codec="libx264", audio_codec="aac", fps=24, verbose=False, logger=None)
-    print("Editing Complete! Video ready for upload.")
+    print("Editing Complete!")
 
 # --- MAIN BOT ---
 def main():
@@ -137,7 +130,7 @@ def main():
     except Exception as e:
         print(f"YouTube Error: {e}")
 
-    # 5. Instagram Upload
+    # 5. Instagram Upload (Session wala)
     try:
         print("Uploading to Instagram...")
         cl = Client()
@@ -150,18 +143,21 @@ def main():
     except Exception as e:
         print(f"Instagram Error: {e}")
 
-    # 6. Cleanup & Move
-    print("Moving video to Done folder...")
-    file_drive = drive.files().get(fileId=video['id'], fields='parents').execute()
-    prev_parents = ",".join(file_drive.get('parents'))
+    # 6. Cleanup & Move (Yahan Drive error fix kiya)
+    try:
+        print("Moving video to Done folder...")
+        file_drive = drive.files().get(fileId=video['id'], fields='parents').execute()
+        prev_parents = ",".join(file_drive.get('parents'))
+        
+        drive.files().update(
+            fileId=video['id'],
+            addParents=DONE_FOLDER,
+            removeParents=prev_parents
+        ).execute()
+    except Exception as e:
+        print(f"Drive Move Error (Permissions Check Karo): {e}")
     
-    drive.files().update(
-        fileId=video['id'],
-        addParents=DONE_FOLDER,
-        removeParents=prev_parents
-    ).execute()
-    
-    # Remove local files to save space
+    # Delete Local Files
     if os.path.exists(raw_video): os.remove(raw_video)
     if os.path.exists(final_video): os.remove(final_video)
     
