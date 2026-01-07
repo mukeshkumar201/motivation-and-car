@@ -1,11 +1,14 @@
-name: Motivation Bot
+name: Motivation Auto Poster
 
 on:
   schedule:
-    # Subah 9:00 AM aur Shaam 6:00 PM (IST approx)
-    - cron: '30 3 * * *'  
-    - cron: '30 12 * * *'
-  workflow_dispatch:      # Manual Run Button
+    # India Time (IST) ke hisaab se timing
+    # Subah 8:30 AM IST = 03:00 UTC
+    - cron: '0 3 * * *'
+    # Shaam 7:30 PM IST = 14:00 UTC
+    - cron: '0 14 * * *'
+  
+  workflow_dispatch:      # Manual 'Run' button
 
 jobs:
   run_bot:
@@ -20,11 +23,17 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Libraries
-        run: pip install -r requirements.txt
+      - name: Install Libraries (Fixed)
+        run: |
+          # Pehle pip aur installation tools ko update karte hain
+          python -m pip install --upgrade pip setuptools wheel
+          
+          # Fir libraries install karte hain (Binary files prefer karenge taaki build fail na ho)
+          pip install -r requirements.txt --prefer-binary
 
-      - name: Run Script
+      - name: Run Main Script
         env:
+          # Sare Secrets yahan load honge
           G_CLIENT_ID: ${{ secrets.G_CLIENT_ID }}
           G_CLIENT_SECRET: ${{ secrets.G_CLIENT_SECRET }}
           G_REFRESH_TOKEN: ${{ secrets.G_REFRESH_TOKEN }}
