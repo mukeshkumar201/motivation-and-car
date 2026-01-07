@@ -3,4 +3,6 @@ google-auth-oauthlib
 google-auth-httplib2
 instagrapi
 requests
-pillow
+moviepy
+imageio-ffmpeg
+numpy<2.0.0
