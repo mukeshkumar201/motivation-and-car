@@ -1,8 +1,9 @@
 google-api-python-client
 google-auth-oauthlib
 google-auth-httplib2
-instagrapi
 requests
 moviepy
 imageio-ffmpeg
 numpy<2.0.0
+instagrapi==2.1.3
+pydantic==1.10.13
